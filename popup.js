@@ -1,10 +1,116 @@
 document.addEventListener('DOMContentLoaded', function () {
   const readButton = document.getElementById('btnRead');
   const clearButton = document.getElementById('btnClear');
+  const settingsButton = document.getElementById('btnSettings');
+  const refreshModelsButton = document.getElementById('btnRefreshModels');
   const textbox = document.getElementById('txtResult');
+  const settingsPanel = document.getElementById('settingsPanel');
+  const modelSelector = document.getElementById('modelSelector');
+  const modelStatus = document.getElementById('modelStatus');
+
+  let selectedModel = 'gpt-oss:latest'; // Default model
 
   readButton.addEventListener('click', handleReadButtonClick);
   clearButton.addEventListener('click', handleClearButtonClick);
+  settingsButton.addEventListener('click', toggleSettings);
+  refreshModelsButton.addEventListener('click', refreshModels);
+  modelSelector.addEventListener('change', handleModelSelection);
+
+  // Initialize the extension
+  init();
+
+  async function init() {
+    await loadSelectedModel();
+    await refreshModels();
+  }
+
+  async function loadSelectedModel() {
+    try {
+      const result = await chrome.storage.sync.get(['selectedModel']);
+      if (result.selectedModel) {
+        selectedModel = result.selectedModel;
+        modelStatus.textContent = `Current model: ${selectedModel}`;
+      }
+    } catch (error) {
+      console.error('Error loading selected model:', error);
+    }
+  }
+
+  async function saveSelectedModel(model) {
+    try {
+      await chrome.storage.sync.set({ selectedModel: model });
+      selectedModel = model;
+      modelStatus.textContent = `Current model: ${model}`;
+    } catch (error) {
+      console.error('Error saving selected model:', error);
+      modelStatus.textContent = 'Error saving model selection';
+    }
+  }
+
+  function toggleSettings() {
+    settingsPanel.classList.toggle('show');
+  }
+
+  async function refreshModels() {
+    refreshModelsButton.disabled = true;
+    refreshModelsButton.textContent = 'Loading...';
+    modelSelector.innerHTML = '<option value="">Loading models...</option>';
+
+    try {
+      const response = await fetch('http://localhost:11434/api/tags');
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.models && Array.isArray(data.models)) {
+        modelSelector.innerHTML = '';
+
+        if (data.models.length === 0) {
+          modelSelector.innerHTML = '<option value="">No models found</option>';
+          modelStatus.textContent = 'No models available. Please install a model with: ollama pull <model-name>';
+          return;
+        }
+
+        data.models.forEach(model => {
+          const option = document.createElement('option');
+          option.value = model.name;
+          option.textContent = `${model.name} (${formatBytes(model.size)})`;
+          if (model.name === selectedModel) {
+            option.selected = true;
+          }
+          modelSelector.appendChild(option);
+        });
+
+        modelStatus.textContent = `Found ${data.models.length} model(s). Current: ${selectedModel}`;
+      } else {
+        throw new Error('Invalid response format from Ollama');
+      }
+    } catch (error) {
+      console.error('Error fetching models:', error);
+      modelSelector.innerHTML = '<option value="">Error loading models</option>';
+      modelStatus.textContent = `Error: ${error.message}. Make sure Ollama is running.`;
+    } finally {
+      refreshModelsButton.disabled = false;
+      refreshModelsButton.textContent = 'Refresh Models';
+    }
+  }
+
+  function handleModelSelection() {
+    const selected = modelSelector.value;
+    if (selected) {
+      saveSelectedModel(selected);
+    }
+  }
+
+  function formatBytes(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
 
   // Simple HTML sanitizer for security
   function sanitizeHTML(html) {
@@ -166,6 +272,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const ollamaEndpoint = 'http://localhost:11434/api/chat';
 
     console.log('Processing text of length:', input.length);
+    console.log('Using model:', selectedModel);
     console.log('Sending to Ollama...');
 
     // Add timeout to prevent hanging
@@ -177,7 +284,7 @@ document.addEventListener('DOMContentLoaded', function () {
       headers: { 'Content-Type': 'application/json' },
       signal: controller.signal,
       body: JSON.stringify({
-        model: "gpt-oss:latest",
+        model: selectedModel,
         stream: false,
         temperature: 0.3,
         messages: [
@@ -217,7 +324,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (error.name === 'AbortError') {
           textbox.textContent = 'Request timed out. The AI model may be taking too long to respond.';
         } else {
-          textbox.textContent = `Error: ${error.message}. Make sure Ollama is running and the gpt-oss:latest model is available.`;
+          textbox.textContent = `Error: ${error.message}. Make sure Ollama is running and the ${selectedModel} model is available.`;
         }
       })
       .finally(() => {

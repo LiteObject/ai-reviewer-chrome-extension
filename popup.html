@@ -53,6 +53,77 @@
             background-color: #c0392b;
         }
 
+        .settings-btn {
+            background-color: #6c757d;
+            color: #fff;
+            font-size: 12px;
+            padding: 0.3rem 0.6rem;
+            margin-left: 5px;
+        }
+
+        .settings-btn:hover {
+            background-color: #5a6268;
+        }
+
+        .settings-panel {
+            display: none;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+            margin: 10px 20px;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .settings-panel.show {
+            display: block;
+        }
+
+        .settings-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #495057;
+        }
+
+        .model-selector {
+            width: 100%;
+            padding: 5px 8px;
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+            margin-bottom: 10px;
+            font-size: 12px;
+            box-sizing: border-box;
+        }
+
+        .refresh-models-btn {
+            background-color: #17a2b8;
+            color: #fff;
+            font-size: 11px;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .refresh-models-btn:hover {
+            background-color: #138496;
+        }
+
+        .model-status {
+            font-size: 11px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px 20px 0 20px;
+        }
+
         #txtResult {
             border: 1px solid #ccc;
             border-radius: 0.25rem;
@@ -212,7 +283,20 @@
 
 <body>
     <div class="flex-container">
-        <h3>AI Page Summarizer</h3>
+        <div class="header-container">
+            <h3>AI Page Summarizer</h3>
+            <button id="btnSettings" class="settings-btn">Settings</button>
+        </div>
+
+        <div id="settingsPanel" class="settings-panel">
+            <div class="settings-title">AI Model Settings</div>
+            <button id="btnRefreshModels" class="refresh-models-btn">Refresh Models</button>
+            <select id="modelSelector" class="model-selector">
+                <option value="">Loading models...</option>
+            </select>
+            <div id="modelStatus" class="model-status">Select a model from the list above</div>
+        </div>
+
         <div class="button-container">
             <button id="btnRead">
                 Summarize
