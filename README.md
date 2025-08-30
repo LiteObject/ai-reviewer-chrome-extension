@@ -29,8 +29,8 @@ A Chrome extension that uses local AI (Ollama) to automatically summarize webpag
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/LiteObject/ai-reviewer-chrome-extension.git
-   cd ai-reviewer-chrome-extension
+   git clone https://github.com/LiteObject/ai-tldr-chrome-extension.git
+   cd ai-tldr-chrome-extension
    ```
 
 2. **Load the extension in Chrome**:
@@ -75,7 +75,7 @@ A Chrome extension that uses local AI (Ollama) to automatically summarize webpag
 ## Project Structure
 
 ```
-ai-reviewer-chrome-extension/
+ai-tldr-chrome-extension/
 ├── manifest.json          # Extension manifest (V3)
 ├── popup.html             # Extension popup UI
 ├── popup.js               # Main functionality and AI integration
