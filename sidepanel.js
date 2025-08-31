@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const keyboardHint = document.getElementById('keyboardHint');
 
     let selectedModel = 'gpt-oss:latest'; // Default model
-    let selectedWordLimit = 500; // Default word limit
+    let selectedWordLimit = 250; // Default word limit
 
     summarizeButton.addEventListener('click', handleSummarizeClick);
     clearButton.addEventListener('click', handleClearClick);
