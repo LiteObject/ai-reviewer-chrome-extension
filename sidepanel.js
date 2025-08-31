@@ -6,15 +6,19 @@ document.addEventListener('DOMContentLoaded', function () {
     const clearButton = document.getElementById('btnClear');
     const settingsButton = document.getElementById('btnSettings');
     const refreshModelsButton = document.getElementById('btnRefreshModels');
+    const copyButton = document.getElementById('btnCopy');
     const summaryContent = document.getElementById('summaryContent');
     const settingsPanel = document.getElementById('settingsPanel');
     const modelSelector = document.getElementById('modelSelector');
     const wordLimitSelector = document.getElementById('wordLimitSelector');
     const modelStatus = document.getElementById('modelStatus');
     const wordCount = document.getElementById('wordCount');
+    const wordCountText = document.getElementById('wordCountText');
+    const readingTime = document.getElementById('readingTime');
     const progressContainer = document.getElementById('progressContainer');
     const progressFill = document.getElementById('progressFill');
     const progressText = document.getElementById('progressText');
+    const keyboardHint = document.getElementById('keyboardHint');
 
     let selectedModel = 'gpt-oss:latest'; // Default model
     let selectedWordLimit = 500; // Default word limit
@@ -23,8 +27,18 @@ document.addEventListener('DOMContentLoaded', function () {
     clearButton.addEventListener('click', handleClearClick);
     settingsButton.addEventListener('click', toggleSettings);
     refreshModelsButton.addEventListener('click', refreshModels);
+    copyButton.addEventListener('click', handleCopyClick);
     modelSelector.addEventListener('change', handleModelSelection);
     wordLimitSelector.addEventListener('change', handleWordLimitSelection);
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', handleKeyboardShortcuts);
+
+    // Show keyboard hint briefly on load
+    setTimeout(() => {
+        showKeyboardHint();
+        setTimeout(hideKeyboardHint, 3000);
+    }, 1000);
 
     // Initialize the extension
     init();
@@ -91,7 +105,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function updateModelStatus() {
-        modelStatus.textContent = `Current: ${selectedModel} | Target length: ${selectedWordLimit} words`;
+        const timestamp = new Date().toLocaleTimeString();
+        modelStatus.textContent = `Current: ${selectedModel} | Target length: ${selectedWordLimit} words | Updated: ${timestamp}`;
     }
 
     function handleWordLimitSelection() {
@@ -130,7 +145,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 data.models.forEach(model => {
                     const option = document.createElement('option');
                     option.value = model.name;
-                    option.textContent = `${model.name} (${formatBytes(model.size)})`;
+                    const sizeInfo = formatBytes(model.size);
+                    const modifiedDate = model.modified_at ? new Date(model.modified_at).toLocaleDateString() : '';
+                    option.textContent = `${model.name} (${sizeInfo}${modifiedDate ? `, ${modifiedDate}` : ''})`;
                     if (model.name === selectedModel) {
                         option.selected = true;
                     }
@@ -233,6 +250,63 @@ document.addEventListener('DOMContentLoaded', function () {
     function handleClearClick() {
         summaryContent.innerHTML = '';
         wordCount.style.display = 'none';
+        copyButton.classList.remove('show');
+    }
+
+    // New functions for enhanced functionality
+    function handleCopyClick() {
+        const textContent = summaryContent.textContent || summaryContent.innerText;
+        navigator.clipboard.writeText(textContent).then(() => {
+            copyButton.textContent = 'Copied!';
+            copyButton.classList.add('copied');
+            setTimeout(() => {
+                copyButton.textContent = 'Copy';
+                copyButton.classList.remove('copied');
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy text:', err);
+            copyButton.textContent = 'Error';
+            setTimeout(() => {
+                copyButton.textContent = 'Copy';
+            }, 2000);
+        });
+    }
+
+    function handleKeyboardShortcuts(event) {
+        // Ctrl+Enter to summarize
+        if (event.ctrlKey && event.key === 'Enter') {
+            event.preventDefault();
+            if (!summarizeButton.disabled) {
+                handleSummarizeClick();
+            }
+        }
+        // Ctrl+C to copy (when summary is visible)
+        else if (event.ctrlKey && event.key === 'c' && summaryContent.textContent.trim()) {
+            if (event.target === document.body || summaryContent.contains(event.target)) {
+                event.preventDefault();
+                handleCopyClick();
+            }
+        }
+        // Escape to close settings
+        else if (event.key === 'Escape') {
+            if (settingsPanel.classList.contains('show')) {
+                toggleSettings();
+            }
+        }
+    }
+
+    function showKeyboardHint() {
+        keyboardHint.classList.add('show');
+    }
+
+    function hideKeyboardHint() {
+        keyboardHint.classList.remove('show');
+    }
+
+    function calculateReadingTime(wordCount) {
+        const wordsPerMinute = 200; // Average reading speed
+        const minutes = Math.ceil(wordCount / wordsPerMinute);
+        return minutes === 1 ? '1 min read' : `${minutes} min read`;
     }
 
     function getPageContentScript() {
@@ -364,10 +438,15 @@ document.addEventListener('DOMContentLoaded', function () {
                         hideProgress();
                         summaryContent.innerHTML = sanitizedHTML;
 
-                        // Count words and show word count
+                        // Count words and show enhanced word count with reading time
                         const wordCountNum = countWords(summaryContent.textContent || summaryContent.innerText);
-                        wordCount.textContent = `${wordCountNum} words`;
-                        wordCount.style.display = 'block';
+                        const readingTimeText = calculateReadingTime(wordCountNum);
+                        wordCountText.textContent = `${wordCountNum} words`;
+                        readingTime.textContent = readingTimeText;
+                        wordCount.style.display = 'flex';
+
+                        // Show copy button
+                        copyButton.classList.add('show');
                     }, 500);
                 } else {
                     hideProgress();

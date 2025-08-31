@@ -280,19 +280,15 @@ curl http://localhost:11434/api/tags
 
 This project is open source. Please check the repository for license details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **Ollama** for providing excellent local AI capabilities
 - **Chrome Extensions API** for the powerful platform
 - **Material Design** principles for UI inspiration
 - The open source community for tools and inspiration
 
-## 🔗 Links
+## Links
 
 - [Ollama Official Site](https://ollama.ai)
 - [Chrome Extension Documentation](https://developer.chrome.com/docs/extensions/)
 - [Side Panel API Documentation](https://developer.chrome.com/docs/extensions/reference/sidePanel/)
-
----
-
-**Latest Update**: Enhanced with side panel interface, theme adaptation, multiple model support, and progress tracking.
