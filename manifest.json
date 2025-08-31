@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "AI Reviewer Extension",
+    "name": "AI TLDR Chrome Extension",
     "version": "1.0",
     "description": "This AI assistant summarizes the content of the active tab.",
     "icons": {
@@ -9,13 +9,22 @@
         "128": "icon.png"
     },
     "action": {
-        "default_title": "AI Reviewer Extension",
+        "default_title": "AI TLDR Extension",
         "default_icon": {
             "16": "icon.png",
             "48": "icon.png",
             "128": "icon.png"
-        },
-        "default_popup": "popup.html"
+        }
     },
-    "permissions": ["activeTab", "scripting", "storage"]
+    "side_panel": {
+        "default_path": "sidepanel.html"
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "permissions": ["activeTab", "scripting", "storage", "sidePanel"],
+    "host_permissions": [
+        "http://*/*",
+        "https://*/*"
+    ]
 }

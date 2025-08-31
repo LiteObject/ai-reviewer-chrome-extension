@@ -227,7 +227,37 @@ document.addEventListener('DOMContentLoaded', function () {
     textbox.textContent = '';
   }
 
-  function getPageContentScript() {
+  async function handleOpenSidePanel() {
+    try {
+      console.log('Opening side panel...');
+
+      // Try to open side panel directly
+      const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tabs && tabs[0]) {
+        await chrome.sidePanel.open({ windowId: tabs[0].windowId });
+        console.log('Side panel opened successfully');
+        // Close the popup after successfully opening side panel
+        window.close();
+      } else {
+        throw new Error('No active tab found');
+      }
+    } catch (error) {
+      console.error('Error in handleOpenSidePanel:', error);
+
+      // Try alternative approach with setOptions
+      try {
+        await chrome.sidePanel.setOptions({
+          path: 'sidepanel.html',
+          enabled: true
+        });
+        console.log('Side panel enabled. Look for side panel in browser UI.');
+        alert('Side panel enabled! Look for the side panel icon in your browser or try right-clicking in the browser to find the side panel option.');
+      } catch (setError) {
+        console.error('Error setting side panel options:', setError);
+        alert(`Could not open side panel. Error: ${error.message}`);
+      }
+    }
+  } function getPageContentScript() {
     try {
       // Extract main content from the page, avoiding navigation, ads, and other noise
       const contentSelectors = [
