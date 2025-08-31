@@ -1,14 +1,30 @@
-# AI Page Summarizer Chrome Extension
+# AI TL;DR Chrome Extension
 
-A Chrome extension that uses local AI (Ollama) to automatically summarize webpage content with beautiful HTML formatting.
+A modern Chrome extension that uses local AI (Ollama) to automatically summarize webpage content with a beautiful, theme-aware side panel interface.
 
 ## Features
 
-- **Smart Content Extraction**: Automatically extracts main content from webpages, filtering out navigation, ads, and other noise
-- **Local AI Processing**: Uses Ollama with `gpt-oss:latest` model for privacy-friendly summarization
+### **Modern Side Panel Interface**
+- **Spacious Side Panel**: Large, comfortable reading area that opens directly when you click the extension icon
+- **Theme-Aware Design**: Automatically adapts to your Chrome theme (light/dark mode)
+- **Flat Design**: Clean, modern interface with minimal shadows and consistent styling
+- **Progress Tracking**: Beautiful animated progress bar showing AI processing stages
+
+### **Advanced AI Integration**
+- **Multiple Model Support**: Choose from any Ollama model with automatic model discovery
+- **Smart Content Extraction**: Intelligently extracts main content, filtering out navigation, ads, and clutter
+- **Configurable Word Limits**: Choose from 250, 500, 750, or 1000 word summaries
 - **Rich HTML Formatting**: Renders summaries with proper tables, headers, lists, and styling
-- **Security-First**: HTML sanitization prevents XSS attacks while maintaining rich formatting
-- **One-Click Operation**: Simple interface with summarize and clear buttons
+
+### **Smart Configuration**
+- **Persistent Settings**: Model selection and word limits are saved automatically
+- **One-Click Model Refresh**: Automatically discovers new Ollama models
+- **Real-Time Status**: Shows current model and word limit in the interface
+
+### **Security & Privacy**
+- **Local Processing**: All AI processing happens locally via Ollama
+- **HTML Sanitization**: Prevents XSS attacks while maintaining rich formatting
+- **No Data Collection**: Your content never leaves your computer
 
 ## Prerequisites
 
@@ -16,14 +32,18 @@ A Chrome extension that uses local AI (Ollama) to automatically summarize webpag
    ```bash
    # Install Ollama (visit https://ollama.ai for installation)
    
-   # Pull the required model
-   ollama pull gpt-oss:latest
+   # Pull a recommended model (or any model you prefer)
+   ollama pull llama3.1
+   # or
+   ollama pull qwen2.5
+   # or
+   ollama pull mistral
    
    # Start Ollama service (runs on localhost:11434)
    ollama serve
    ```
 
-2. **Chrome Browser**: Chrome or Chromium-based browser with extension support
+2. **Chrome Browser**: Chrome or Chromium-based browser (version 114+ for side panel support)
 
 ## Installation
 
@@ -41,118 +61,182 @@ A Chrome extension that uses local AI (Ollama) to automatically summarize webpag
 
 3. **Verify installation**:
    - The extension icon should appear in the Chrome toolbar
-   - Make sure Ollama is running with the `gpt-oss:latest` model
+   - Make sure Ollama is running with at least one model
 
 ## Usage
 
+### Basic Operation
 1. **Navigate to any webpage** with content you want to summarize
-2. **Click the extension icon** in the Chrome toolbar
-3. **Click "Summarize"** to extract and analyze the page content
-4. **View the formatted summary** with tables, headers, and rich formatting
-5. **Click "Clear"** to reset the results area
+2. **Click the extension icon** - the side panel opens automatically
+3. **Configure settings** (optional):
+   - Click "Settings" to choose your AI model
+   - Select your preferred summary length (250-1000 words)
+4. **Click "Summarize Current Page"** 
+5. **Watch the progress bar** as the AI processes your content
+6. **Read your formatted summary** in the comfortable side panel
+
+### Advanced Features
+- **Model Management**: Use "Refresh Models" to discover newly installed Ollama models
+- **Word Count**: See exactly how many words are in your summary
+- **Theme Adaptation**: The interface automatically matches your Chrome theme
+- **Settings Persistence**: Your preferences are saved between sessions
 
 ## Technical Details
 
 ### Architecture
 - **Manifest V3**: Modern Chrome extension using latest APIs
-- **Content Extraction**: Smart algorithms to identify main content areas
-- **AI Integration**: Direct API calls to local Ollama instance
-- **HTML Rendering**: Secure HTML sanitization with rich formatting support
+- **Side Panel API**: Utilizes Chrome's newest side panel feature for better UX
+- **Theme Integration**: Automatically detects and adapts to Chrome themes
+- **Progressive Enhancement**: Works with any Ollama-compatible model
+
+### Content Processing Pipeline
+1. **Smart Extraction**: Identifies main content areas using semantic selectors
+2. **Noise Filtering**: Removes navigation, ads, comments, and other clutter  
+3. **Content Optimization**: Limits content length for optimal AI processing
+4. **AI Summarization**: Processes through local Ollama with customizable prompts
+5. **Rich Rendering**: Sanitizes and displays HTML with full formatting
 
 ### Supported HTML Elements
-- Headers (`h1`, `h2`, `h3`)
-- Text formatting (`strong`, `em`, `code`)
+- Headers (`h1`, `h2`, `h3`, `h4`, `h5`, `h6`)
+- Text formatting (`strong`, `b`, `em`, `i`, `u`)
 - Lists (`ul`, `ol`, `li`)
-- Tables (`table`, `tr`, `th`, `td`)
+- Tables (`table`, `thead`, `tbody`, `tr`, `th`, `td`)
+- Code blocks (`code`, `pre`)
+- Blockquotes (`blockquote`)
 - Paragraphs and line breaks
-- Blockquotes
 
 ### Security Features
-- HTML sanitization prevents XSS attacks
-- Only safe HTML tags and attributes are allowed
-- No external network requests (except to local Ollama)
+- **Comprehensive HTML Sanitization**: Prevents XSS attacks
+- **Safe Tag Whitelist**: Only allows safe HTML elements and attributes
+- **Local Processing**: No external API calls or data transmission
+- **Content Security Policy**: Strict CSP compliance
 
 ## Project Structure
 
 ```
 ai-tldr-chrome-extension/
 ├── manifest.json          # Extension manifest (V3)
-├── popup.html             # Extension popup UI
-├── popup.js               # Main functionality and AI integration
-├── icon.png               # Extension iconextraction
+├── sidepanel.html         # Main side panel interface
+├── sidepanel.js           # Side panel functionality and AI integration
+├── popup.html             # Fallback popup interface
+├── popup.js               # Popup functionality
+├── background.js          # Service worker for extension coordination
+├── icon.png               # Extension icon
 └── README.md              # This file
 ```
 
 ## Configuration
 
-### Changing AI Model
-Edit `popup.js` and modify the model name:
+### Changing Default Model
+The extension automatically detects available models, but you can set a default in `sidepanel.js`:
 ```javascript
-body: JSON.stringify({
-  model: "your-preferred-model", // Change this line
-  stream: false,
-  temperature: 0.3,
-  // ...
-})
+let selectedModel = 'your-preferred-model'; // Change this line
 ```
 
-### Adjusting Content Length
-Modify the content extraction limit in `popup.js`:
-```javascript
-const maxLength = 8000; // Adjust this value
+### Adjusting Word Limits
+Modify the available word limits in the HTML:
+```html
+<select id="wordLimitSelector" class="word-limit-selector">
+    <option value="250">Very Short (250 words)</option>
+    <option value="500" selected>Short (500 words)</option>
+    <!-- Add custom values here -->
+</select>
+```
+
+### Theme Customization
+The extension automatically adapts to Chrome themes, but you can customize colors in `sidepanel.html`:
+```css
+:root {
+    --color-primary-brand: #your-color;
+    --color-primary-brand-text: #your-text-color;
+}
 ```
 
 ## Development
 
 ### Testing Ollama Connection
-Open `test_ollama.html` in your browser to test the Ollama API connection independently.
+Test the connection directly:
+```bash
+curl http://localhost:11434/api/tags
+```
 
 ### Debugging
-1. Right-click the extension popup and select "Inspect"
-2. Check the console for error messages and logs
-3. Verify Ollama is running: `curl http://localhost:11434/api/tags`
+1. **Side Panel**: Right-click in the side panel and select "Inspect"
+2. **Background**: Go to `chrome://extensions/` → Details → Inspect views: background page
+3. **Console Logs**: Check for detailed theme detection and processing logs
 
 ### Making Changes
 1. Edit the source files
-2. Reload the extension in `chrome://extensions/`
-3. Test the changes
+2. Go to `chrome://extensions/`
+3. Click the refresh button on your extension
+4. Test the changes
 
 ## Troubleshooting
 
 ### Common Issues
 
-**"Extension error: Chrome scripting API not available"**
+**Side panel doesn't open**
+- Ensure you're using Chrome 114+ 
 - Reload the extension completely
-- Ensure manifest.json has `"scripting"` permission
+- Check background script errors in extension details
 
-**"No content found on this page"**
-- Try on a different webpage with more content
-- Check if the page has restrictions on content extraction
-
-**"Error: Network error" or connection issues**
+**"No models found"**
 - Verify Ollama is running: `ollama serve`
-- Check if the model is available: `ollama list`
-- Ensure no firewall blocking localhost:11434
+- Check available models: `ollama list`
+- Use "Refresh Models" button in settings
 
-**Poor summary quality**
-- Try a different AI model
-- Adjust the temperature parameter
-- Modify the system prompt for different output styles
+**Theme colors not applying**
+- Check browser console for theme detection logs
+- Verify Chrome theme settings
+- Dark mode detection should work automatically
+
+**Content extraction fails**
+- Try on different types of webpages
+- Check if site has content restrictions
+- View console logs for extraction details
+
+**AI processing errors**
+- Ensure Ollama model is fully downloaded
+- Check Ollama service status
+- Verify model compatibility with your system
+
+### Performance Tips
+- **Choose appropriate word limits**: Longer summaries take more processing time
+- **Use efficient models**: Smaller models like `qwen2.5:7b` are faster than larger ones
+- **Close unused side panels**: Multiple panels can consume resources
 
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes
-4. Test thoroughly
+3. Make your changes and test thoroughly
+4. Update documentation if needed
 5. Submit a pull request
+
+### Development Guidelines
+- Follow existing code style and patterns
+- Test with multiple Ollama models
+- Ensure theme compatibility
+- Verify side panel functionality
+- Update README for new features
 
 ## License
 
 This project is open source. Please check the repository for license details.
 
-## Acknowledgments
+## 🙏 Acknowledgments
 
-- **Ollama** for providing local AI capabilities
-- **Chrome Extensions API** for the platform
-- The open source community for inspiration and tools
+- **Ollama** for providing excellent local AI capabilities
+- **Chrome Extensions API** for the powerful platform
+- **Material Design** principles for UI inspiration
+- The open source community for tools and inspiration
+
+## 🔗 Links
+
+- [Ollama Official Site](https://ollama.ai)
+- [Chrome Extension Documentation](https://developer.chrome.com/docs/extensions/)
+- [Side Panel API Documentation](https://developer.chrome.com/docs/extensions/reference/sidePanel/)
+
+---
+
+**Latest Update**: Enhanced with side panel interface, theme adaptation, multiple model support, and progress tracking.
