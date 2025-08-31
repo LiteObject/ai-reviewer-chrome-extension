@@ -45,7 +45,46 @@ A modern Chrome extension that uses local AI (Ollama) to automatically summarize
 
 2. **Chrome Browser**: Chrome or Chromium-based browser (version 114+ for side panel support)
 
+### Required Permissions
+- `activeTab` - Access to current tab content
+- `scripting` - Execute content extraction scripts
+- `storage` - Save user preferences
+- `sidePanel` - Display the side panel interface
+- `host_permissions` - Access web content (http://*/*, https://*/*)
+
+### Recommended Ollama Models
+- `gpt-oss:latest` (default)
+- `llama3.1` - Balanced performance
+- `qwen2.5` - Fast and efficient
+- `mistral` - Good for technical content
+
+### Ollama Configuration
+By default, the extension expects Ollama to be running on:
+- **Endpoint**: `http://localhost:11434`
+- **API Routes Used**:
+  - `/api/tags` - List available models
+  - `/api/chat` - Generate summaries
+
 ## Installation
+
+### Quick Start
+```bash
+# 1. Install Ollama
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# 2. Pull a model
+ollama pull llama3.1
+
+# 3. Start Ollama
+ollama serve
+
+# 4. Load extension in Chrome
+# Navigate to chrome://extensions/ and load unpacked
+```
+
+### Detailed Installation
+
+### Detailed Installation
 
 1. **Clone the repository**:
    ```bash
@@ -62,6 +101,11 @@ A modern Chrome extension that uses local AI (Ollama) to automatically summarize
 3. **Verify installation**:
    - The extension icon should appear in the Chrome toolbar
    - Make sure Ollama is running with at least one model
+
+### Compatibility Notes
+- **Chrome 114+**: Uses modern side panel interface
+- **Older versions**: Falls back to popup interface
+- Both interfaces share the same settings via Chrome storage API
 
 ## Usage
 
@@ -111,6 +155,12 @@ A modern Chrome extension that uses local AI (Ollama) to automatically summarize
 - **Local Processing**: No external API calls or data transmission
 - **Content Security Policy**: Strict CSP compliance
 
+### Security Implementation
+- HTML sanitization removes all script tags and event handlers
+- Only allows safe HTML tags (no iframe, embed, object, etc.)
+- Filters all attributes except 'class'
+- No external resource loading
+
 ## Project Structure
 
 ```
@@ -124,6 +174,12 @@ ai-tldr-chrome-extension/
 ├── icon.png               # Extension icon
 └── README.md              # This file
 ```
+
+## Known Limitations
+- May not work on pages with heavy JavaScript rendering (SPAs)
+- Content extraction limited to 8000 characters by default
+- Requires active Ollama service running locally
+- Cannot process PDF or other non-HTML content directly
 
 ## Configuration
 
@@ -219,6 +275,9 @@ curl http://localhost:11434/api/tags
 - Ensure theme compatibility
 - Verify side panel functionality
 - Update README for new features
+
+## Version History
+- **v1.0** - Initial release with side panel support, theme adaptation, and multiple model support
 
 ## License
 
