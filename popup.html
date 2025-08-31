@@ -5,74 +5,57 @@
     <title>AI Reviewer Ext</title>
     <style>
         body {
-            display: flex;
-            flex-direction: column;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            width: 300px;
-            height: 500px;
+            font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-
-        .button-container {
+            width: 320px;
+            height: 500px;
+            background: #fafafa;
+            color: rgba(0, 0, 0, 0.87);
             display: flex;
-            justify-content: space-around;
-            width: calc(100% - 40px);
-            margin: 0 20px;
-            box-sizing: border-box;
+            flex-direction: column;
         }
 
-        .button-container button:not(:last-child) {
-            margin-right: 10px;
+        .header-container {
+            background: #2196f3;
+            color: white;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        button {
-            background-color: #2596be;
-            color: #fff;
-            font-weight: bold;
-            padding: 0.5rem 1rem;
-            border-radius: 0.25rem;
-            border-width: 0;
-            transition: background-color 0.15s ease-in-out;
+        .header-container h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 400;
             flex: 1;
-            box-sizing: border-box;
-        }
-
-        button:hover {
-            background-color: #1b708f;
-        }
-
-        .btnClear {
-            background-color: #e74c3c;
-            color: #fff;
-        }
-
-        .btnClear:hover {
-            background-color: #c0392b;
         }
 
         .settings-btn {
-            background-color: #6c757d;
-            color: #fff;
-            font-size: 12px;
-            padding: 0.3rem 0.6rem;
-            margin-left: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            font-size: 10px;
+            padding: 4px 8px;
+            cursor: pointer;
+            border-radius: 3px;
+            flex-shrink: 0;
         }
 
         .settings-btn:hover {
-            background-color: #5a6268;
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
         }
 
         .settings-panel {
             display: none;
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 0.25rem;
-            margin: 10px 20px;
-            padding: 15px;
-            box-sizing: border-box;
+            background: white;
+            margin: 8px;
+            padding: 16px;
+            border-radius: 2px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
         }
 
         .settings-panel.show {
@@ -80,203 +63,170 @@
         }
 
         .settings-title {
-            font-weight: bold;
-            margin-bottom: 10px;
             font-size: 14px;
-            color: #495057;
+            font-weight: 500;
+            margin-bottom: 12px;
+            color: rgba(0, 0, 0, 0.87);
         }
 
         .model-selector {
             width: 100%;
-            padding: 5px 8px;
-            border: 1px solid #ced4da;
-            border-radius: 0.25rem;
-            margin-bottom: 10px;
-            font-size: 12px;
-            box-sizing: border-box;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 2px;
+            font-size: 14px;
+            margin-bottom: 8px;
+            font-family: inherit;
+        }
+
+        .model-selector:focus {
+            outline: none;
+            border-color: #2196f3;
         }
 
         .refresh-models-btn {
-            background-color: #17a2b8;
-            color: #fff;
-            font-size: 11px;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
+            background: #2196f3;
+            color: white;
             border: none;
+            padding: 6px 12px;
+            border-radius: 2px;
+            font-size: 12px;
             cursor: pointer;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .refresh-models-btn:hover {
-            background-color: #138496;
+            background: #1976d2;
         }
 
         .model-status {
             font-size: 11px;
-            color: #6c757d;
-            margin-top: 5px;
+            color: rgba(0, 0, 0, 0.54);
         }
 
-        .header-container {
+        .button-container {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 10px 20px 0 20px;
+            gap: 8px;
+            padding: 16px;
+        }
+
+        button {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 2px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            flex: 1;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+        }
+
+        button:hover {
+            background: #1976d2;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16);
+        }
+
+        .btnClear {
+            background: #f44336;
+        }
+
+        .btnClear:hover {
+            background: #d32f2f;
         }
 
         #txtResult {
-            border: 1px solid #ccc;
-            border-radius: 0.25rem;
-            padding: 8px 12px;
-            width: calc(100% - 40px);
-            box-sizing: border-box;
-            flex-grow: 1;
-            margin: 10px 20px;
-            resize: none;
-            min-height: 100px;
-            overflow-y: auto;
-            font-family: Arial, sans-serif;
+            flex: 1;
+            margin: 8px;
+            padding: 16px;
+            border: none;
+            border-radius: 2px;
+            background: white;
+            font-family: inherit;
             font-size: 14px;
             line-height: 1.5;
-            text-align: left;
-            background-color: #fafafa;
+            resize: none;
+            outline: none;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+            color: rgba(0, 0, 0, 0.87);
         }
 
-        /* Markdown styling */
+        /* Simple content styling */
+        #txtResult h1,
+        #txtResult h2,
+        #txtResult h3 {
+            color: rgba(0, 0, 0, 0.87);
+            font-weight: 400;
+        }
+
         #txtResult h1 {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 12px 0 8px 0;
-            color: #333;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 4px;
+            font-size: 20px;
+            margin: 16px 0 8px 0;
         }
 
         #txtResult h2 {
-            font-size: 16px;
-            font-weight: bold;
-            margin: 10px 0 6px 0;
-            color: #444;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 2px;
+            font-size: 18px;
+            margin: 14px 0 6px 0;
         }
 
         #txtResult h3 {
-            font-size: 14px;
-            font-weight: bold;
-            margin: 8px 0 4px 0;
-            color: #555;
+            font-size: 16px;
+            margin: 12px 0 4px 0;
         }
 
-        #txtResult strong {
-            font-weight: bold;
-            color: #333;
-        }
-
-        #txtResult em {
-            font-style: italic;
-            color: #666;
+        #txtResult p {
+            margin: 8px 0;
         }
 
         #txtResult ul {
-            margin: 8px 0;
             padding-left: 20px;
         }
 
         #txtResult li {
             margin: 4px 0;
-            list-style-type: disc;
-        }
-
-        #txtResult p {
-            margin: 8px 0;
-            line-height: 1.6;
         }
 
         #txtResult code {
-            background-color: #f0f0f0;
+            background: #f5f5f5;
             padding: 2px 4px;
-            border-radius: 3px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
+            border-radius: 2px;
+            font-size: 13px;
         }
 
-        #txtResult blockquote {
-            border-left: 4px solid #ddd;
-            margin: 8px 0;
-            padding-left: 12px;
-            color: #666;
-            font-style: italic;
+        #txtResult pre {
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 2px;
+            overflow-x: auto;
         }
 
-        /* Table styling */
         #txtResult table {
             width: 100%;
             border-collapse: collapse;
-            margin: 12px 0;
-            font-size: 13px;
-            background-color: white;
-            border: 1px solid #ddd;
+            margin: 8px 0;
+        }
+
+        #txtResult th,
+        #txtResult td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
         }
 
         #txtResult th {
-            background-color: #f8f9fa;
-            font-weight: bold;
-            padding: 8px 12px;
-            text-align: left;
-            border-bottom: 2px solid #dee2e6;
-            border-right: 1px solid #dee2e6;
-        }
-
-        #txtResult td {
-            padding: 6px 12px;
-            border-bottom: 1px solid #dee2e6;
-            border-right: 1px solid #dee2e6;
-            vertical-align: top;
-        }
-
-        #txtResult tr:nth-child(even) {
-            background-color: #f8f9fa;
-        }
-
-        #txtResult tr:hover {
-            background-color: #e9ecef;
-        }
-
-        #txtResult th:last-child,
-        #txtResult td:last-child {
-            border-right: none;
-        }
-
-        /* Code block styling */
-        #txtResult pre {
-            background-color: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 4px;
-            padding: 12px;
-            margin: 8px 0;
-            overflow-x: auto;
-            font-family: 'Courier New', Monaco, monospace;
-            font-size: 12px;
-        }
-
-        #txtResult pre code {
-            background: none;
-            padding: 0;
-            border-radius: 0;
+            background: #f5f5f5;
+            font-weight: 500;
         }
 
         .flex-container {
             display: flex;
             flex-direction: column;
             height: 100%;
-            width: 100%;
-            box-sizing: border-box;
         }
-
-        .flex-container>*:not(#txtResult) {
-            flex-shrink: 0;
-        }
+    </style>
     </style>
     <script src="popup.js"></script>
 </head>
@@ -294,17 +244,23 @@
             <select id="modelSelector" class="model-selector">
                 <option value="">Loading models...</option>
             </select>
+
+            <div class="settings-title" style="margin-top: 16px;">Summary Length</div>
+            <select id="wordLimitSelector" class="model-selector">
+                <option value="250">Very Short (250 words)</option>
+                <option value="500" selected>Short (500 words)</option>
+                <option value="750">Medium (750 words)</option>
+                <option value="1000">Long (1000 words)</option>
+            </select>
+
             <div id="modelStatus" class="model-status">Select a model from the list above</div>
         </div>
 
         <div class="button-container">
-            <button id="btnRead">
-                Summarize
-            </button>
-            <button id="btnClear" class="btnClear">
-                Clear
-            </button>
+            <button id="btnRead">Summarize</button>
+            <button id="btnClear" class="btnClear">Clear</button>
         </div>
+
         <div id="txtResult" contenteditable="true"></div>
     </div>
 </body>

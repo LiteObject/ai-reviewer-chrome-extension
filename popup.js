@@ -6,33 +6,40 @@ document.addEventListener('DOMContentLoaded', function () {
   const textbox = document.getElementById('txtResult');
   const settingsPanel = document.getElementById('settingsPanel');
   const modelSelector = document.getElementById('modelSelector');
+  const wordLimitSelector = document.getElementById('wordLimitSelector');
   const modelStatus = document.getElementById('modelStatus');
 
   let selectedModel = 'gpt-oss:latest'; // Default model
+  let selectedWordLimit = 500; // Default word limit
 
   readButton.addEventListener('click', handleReadButtonClick);
   clearButton.addEventListener('click', handleClearButtonClick);
   settingsButton.addEventListener('click', toggleSettings);
   refreshModelsButton.addEventListener('click', refreshModels);
   modelSelector.addEventListener('change', handleModelSelection);
+  wordLimitSelector.addEventListener('change', handleWordLimitSelection);
 
   // Initialize the extension
   init();
 
   async function init() {
-    await loadSelectedModel();
+    await loadSettings();
     await refreshModels();
   }
 
-  async function loadSelectedModel() {
+  async function loadSettings() {
     try {
-      const result = await chrome.storage.sync.get(['selectedModel']);
+      const result = await chrome.storage.sync.get(['selectedModel', 'selectedWordLimit']);
       if (result.selectedModel) {
         selectedModel = result.selectedModel;
-        modelStatus.textContent = `Current model: ${selectedModel}`;
       }
+      if (result.selectedWordLimit) {
+        selectedWordLimit = result.selectedWordLimit;
+        wordLimitSelector.value = selectedWordLimit;
+      }
+      updateModelStatus();
     } catch (error) {
-      console.error('Error loading selected model:', error);
+      console.error('Error loading settings:', error);
     }
   }
 
@@ -40,10 +47,32 @@ document.addEventListener('DOMContentLoaded', function () {
     try {
       await chrome.storage.sync.set({ selectedModel: model });
       selectedModel = model;
-      modelStatus.textContent = `Current model: ${model}`;
+      updateModelStatus();
     } catch (error) {
       console.error('Error saving selected model:', error);
       modelStatus.textContent = 'Error saving model selection';
+    }
+  }
+
+  async function saveSelectedWordLimit(wordLimit) {
+    try {
+      await chrome.storage.sync.set({ selectedWordLimit: wordLimit });
+      selectedWordLimit = wordLimit;
+      updateModelStatus();
+    } catch (error) {
+      console.error('Error saving word limit:', error);
+      modelStatus.textContent = 'Error saving word limit';
+    }
+  }
+
+  function updateModelStatus() {
+    modelStatus.textContent = `Model: ${selectedModel} | Length: ${selectedWordLimit} words`;
+  }
+
+  function handleWordLimitSelection() {
+    const selected = parseInt(wordLimitSelector.value);
+    if (selected) {
+      saveSelectedWordLimit(selected);
     }
   }
 
@@ -273,6 +302,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     console.log('Processing text of length:', input.length);
     console.log('Using model:', selectedModel);
+    console.log('Word limit:', selectedWordLimit);
     console.log('Sending to Ollama...');
 
     // Add timeout to prevent hanging
@@ -290,11 +320,11 @@ document.addEventListener('DOMContentLoaded', function () {
         messages: [
           {
             role: "system",
-            content: "You are a helpful assistant that creates clear, well-structured summaries using clean HTML formatting. Generate properly formatted HTML with: <h2>, <h3> for headers, <strong> for bold, <em> for italics, <ul><li> for lists, and <table><tr><th><td> for tables. Use semantic HTML structure and ensure all tags are properly closed. Do not include any CSS, scripts, or dangerous elements - only safe content HTML."
+            content: `You are a helpful assistant that creates clear, well-structured summaries using clean HTML formatting. Generate properly formatted HTML with: <h2>, <h3> for headers, <strong> for bold, <em> for italics, <ul><li> for lists, and <table><tr><th><td> for tables. Use semantic HTML structure and ensure all tags are properly closed. Do not include any CSS, scripts, or dangerous elements - only safe content HTML. IMPORTANT: Keep the summary to approximately ${selectedWordLimit} words or less.`
           },
           {
             role: "user",
-            content: `Please create a well-formatted HTML summary of the following content. Use proper HTML tags for headers, tables, lists, and emphasis:\n\n${input}`
+            content: `Please create a concise, well-formatted HTML summary of the following content in approximately ${selectedWordLimit} words or less. Use proper HTML tags for headers, tables, lists, and emphasis:\n\n${input}`
           }
         ]
       })
