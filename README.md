@@ -276,9 +276,6 @@ curl http://localhost:11434/api/tags
 - Verify side panel functionality
 - Update README for new features
 
-## Version History
-- **v1.0** - Initial release with side panel support, theme adaptation, and multiple model support
-
 ## License
 
 This project is open source. Please check the repository for license details.
