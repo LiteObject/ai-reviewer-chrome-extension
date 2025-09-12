@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const progressText = document.getElementById('progressText');
     const keyboardHint = document.getElementById('keyboardHint');
 
-    let selectedModel = 'gpt-oss:latest'; // Default model
+    let selectedModel = 'gpt-oss:20b'; // Default model - updated to match available model
     let selectedWordLimit = 250; // Default word limit
 
     summarizeButton.addEventListener('click', handleSummarizeClick);
@@ -170,6 +170,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function handleModelSelection() {
         const selected = modelSelector.value;
+        console.log('=== MODEL SELECTION DEBUG ===');
+        console.log('Previous selectedModel:', selectedModel);
+        console.log('New selected value:', selected);
+        console.log('=============================');
         if (selected) {
             saveSelectedModel(selected);
         }
@@ -184,6 +188,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function handleSummarizeClick() {
+        console.log('=== SUMMARIZE DEBUG ===');
+        console.log('Selected model:', selectedModel);
+        console.log('Selected word limit:', selectedWordLimit);
+        console.log('Model selector value:', modelSelector.value);
+        console.log('=======================');
+
         summarizeButton.disabled = true;
         summarizeButton.textContent = 'Summarizing...';
 
@@ -456,6 +466,10 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(error => {
                 clearTimeout(timeoutId);
                 console.error('Error:', error);
+                console.log('=== ERROR DEBUG ===');
+                console.log('Selected model at error time:', selectedModel);
+                console.log('Error message:', error.message);
+                console.log('==================');
                 hideProgress();
 
                 if (error.name === 'AbortError') {
